@@ -38,22 +38,7 @@ public class MainActivity extends AppCompatActivity {
 //        progress1.setProgress(15);
 
         progressOne = (IconRoundCornerProgressBar) findViewById(R.id.progress_one);
-        progressOne.setMax(100);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        progressOne.setMax(100f);
 
         User_HP = (TextView) findViewById(R.id.User_HP);
         aa = LocalBroadcastManager.getInstance(MainActivity.this);
@@ -73,9 +58,6 @@ public class MainActivity extends AppCompatActivity {
                 // You can also include some extra data.
                 hp_gen_intent.setAction("strike sttack");
                 aa.sendBroadcast(hp_gen_intent);
-                progressOne.setProgress(70);
-                Toast.makeText(getApplicationContext(),"ss"+progressOne.getMax(),Toast.LENGTH_LONG).show();
-                Toast.makeText(getApplicationContext(),"ss"+progressOne.getProgress(),Toast.LENGTH_LONG).show();
             }
         });
         HpRecoveryService.isStop = true;
@@ -122,7 +104,9 @@ public class MainActivity extends AppCompatActivity {
             // TODO Auto-generated method stub
             // Get extra data included in the Intent
             int message = intent.getIntExtra("message",100);
-            User_HP.setText(""+message);
+            progressOne.setProgress(message);
+            User_HP.setText("HP : "+message);
+
         }
     };
 

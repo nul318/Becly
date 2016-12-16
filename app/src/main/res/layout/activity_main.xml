@@ -33,8 +33,9 @@
             app:rcIconSize="40dp"
             app:rcIconSrc="@mipmap/ic_android"
             android:id="@+id/progress_one"
+            app:rcMax="100"
             app:rcProgressColor="@color/custom_progress_red_progress"
-            app:rcRadius="5dp" />
+            app:rcRadius="10dp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -42,7 +43,8 @@
             android:lineSpacingExtra="4dp"
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
-            android:text="HP : "
+            android:text="HP : 100"
+            android:id="@+id/User_HP"
             android:textColor="@color/text"
             android:textSize="30sp" />
         <LinearLayout
@@ -71,11 +73,6 @@
                 android:layout_height="wrap_content"
                 android:src="@mipmap/ic_android"/>
             </LinearLayout>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/User_HP"
-            android:text="Hello World!" />
 
         <Button
             android:text="Button"
