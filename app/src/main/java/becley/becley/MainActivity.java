@@ -6,12 +6,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.akexorcist.roundcornerprogressbar.IconRoundCornerProgressBar;
+import com.akexorcist.roundcornerprogressbar.RoundCornerProgressBar;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -19,11 +24,37 @@ public class MainActivity extends AppCompatActivity {
     private TextView User_HP;
     LocalBroadcastManager aa;
 
-
+    private IconRoundCornerProgressBar progressOne;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+//        RoundCornerProgressBar progress1 = (RoundCornerProgressBar) findViewById(R.id.progress_1);
+//        progress1.setProgressColor(Color.parseColor("#ed3b27"));
+//        progress1.setProgressBackgroundColor(Color.parseColor("#808080"));
+//        progress1.setMax(70);
+//        progress1.setProgress(15);
+
+        progressOne = (IconRoundCornerProgressBar) findViewById(R.id.progress_one);
+        progressOne.setMax(100);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         User_HP = (TextView) findViewById(R.id.User_HP);
         aa = LocalBroadcastManager.getInstance(MainActivity.this);
 
@@ -42,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
                 // You can also include some extra data.
                 hp_gen_intent.setAction("strike sttack");
                 aa.sendBroadcast(hp_gen_intent);
+                progressOne.setProgress(70);
+                Toast.makeText(getApplicationContext(),"ss"+progressOne.getMax(),Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(),"ss"+progressOne.getProgress(),Toast.LENGTH_LONG).show();
             }
         });
         HpRecoveryService.isStop = true;
