@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="becley.becley">
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -20,6 +21,12 @@
         <service android:name=".ShakeService">
             <intent-filter>
                 <action android:name="becley.becley.shakeservice"/>
+            </intent-filter>
+        </service>
+
+        <service android:name=".HpRecoveryService">
+            <intent-filter>
+                <action android:name="becley.becley.hprecoveryservice"/>
             </intent-filter>
         </service>
 
