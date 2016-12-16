@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -25,7 +26,7 @@ public class ShakeTest extends Activity implements SensorEventListener {
     private float lastZ;
     private float x, y, z;
 
-    private static final int SHAKE_THRESHOLD = 800;
+    private static final int SHAKE_THRESHOLD = 1500;
     private static final int DATA_X = SensorManager.DATA_X;
     private static final int DATA_Y = SensorManager.DATA_Y;
     private static final int DATA_Z = SensorManager.DATA_Z;
@@ -34,7 +35,7 @@ public class ShakeTest extends Activity implements SensorEventListener {
     private Sensor accelerormeterSensor;
 
 
-    TextView cnt;
+    int cnt=0;
 
     Boolean attack_time = true;
     Boolean defense_check;
@@ -47,6 +48,8 @@ public class ShakeTest extends Activity implements SensorEventListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shake);
+
+
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerormeterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -131,47 +134,50 @@ public class ShakeTest extends Activity implements SensorEventListener {
 //                }
                 if (speed > SHAKE_THRESHOLD) {
                     // 이벤트발생!!
-                    if (attack_time) {
+                    cnt++;
+                    if(cnt>10){
+                        cnt=0;
+                        if (attack_time) {
+                            Log.i("씌발","ㅁㄴㅇㄴㅇ");
+                            vibe.vibrate(500);
 
-                        vibe.vibrate(500);
-
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                attack_time = false;
+                            new Thread() {
+                                @Override
+                                public void run() {
+                                    attack_time = false;
 
 
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        attack_check.setText("기본공격 쿨타임 입니다");
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            attack_check.setText("기본공격 쿨타임 입니다");
+                                        }
+                                    });
+
+
+                                    try {
+                                        Thread.sleep(1500);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
                                     }
-                                });
 
 
-                                try {
-                                    Thread.sleep(1500);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
+                                    attack_time = true;
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            attack_check.setText("기본공격 가능");
+                                        }
+                                    });
                                 }
+                            }.start();
 
-
-                                attack_time = true;
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        attack_check.setText("기본공격 가능");
-                                    }
-                                });
+                        } else {
+                            if(!mp.isPlaying()) {
+                                Log.i("씌발","들어오지마");
+                                mp.setLooping(false);
+                                mp.start();
                             }
-                        }.start();
-
-                    } else {
-
-                        if(!mp.isPlaying()) {
-
-                            mp.setLooping(false);
-                            mp.start();
                         }
                     }
                 }
@@ -185,10 +191,6 @@ public class ShakeTest extends Activity implements SensorEventListener {
             }
         }
 
-    }
-
-    float Radian2Degree(float radian) {
-        return radian * 180 / (float) Math.PI;
     }
 
 }
