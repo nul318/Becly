@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
-import android.widget.Toast;
 
 
 /**
@@ -43,7 +41,7 @@ public class HpRecoveryService extends Service {
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("basic attack");
-        intentFilter.addAction("strike sttack");
+        intentFilter.addAction("strike attack");
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 enemy_attack, intentFilter);
@@ -83,7 +81,7 @@ public class HpRecoveryService extends Service {
                     }
                     thread_val++;
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(60000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

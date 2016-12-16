@@ -1,7 +1,5 @@
 package becley.becley;
 
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,12 +21,16 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.akexorcist.roundcornerprogressbar.IconRoundCornerProgressBar;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.nearby.Nearby;
+import com.google.android.gms.nearby.messages.Message;
+import com.google.android.gms.nearby.messages.MessageListener;
+import com.google.android.gms.nearby.messages.PublishCallback;
+import com.google.android.gms.nearby.messages.PublishOptions;
+import com.google.android.gms.nearby.messages.Strategy;
 
 import at.grabner.circleprogress.CircleProgressView;
 
@@ -45,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float x, y, z;
 
     private static final int SHAKE_THRESHOLD = 200;
+    private static final int STRIKE_THRESHOLD = 10000;
+
     private static final int DATA_X = SensorManager.DATA_X;
     private static final int DATA_Y = SensorManager.DATA_Y;
     private static final int DATA_Z = SensorManager.DATA_Z;
@@ -64,18 +68,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     MediaPlayer mp;
     MediaPlayer mp2;
     MediaPlayer mp3;
-
+    MediaPlayer mp4;
 
     int defense_check=-1;
 
 
     private GoogleApiClient mGoogleApiClient;
+    private Message mActiveMessage;
+    private MessageListener mMessageListener;
 
 
 
 
     private TextView User_HP;
     LocalBroadcastManager aa;
+
+    private static final String TAG = "near";
 
     private IconRoundCornerProgressBar progressOne;
     @Override
@@ -94,6 +102,31 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 .enableAutoManage(this, this)
                 .build();
 
+        mMessageListener = new MessageListener() {
+            @Override
+            public void onFound(Message message) {
+                if(defense_check == 2){
+                    Log.i("near", "방어막");
+                    return;
+                }
+                if(message.getType().equals("Basic")){
+                    LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(new Intent("basic attack"));
+                }
+                else if(message.getType().equals("Strike")){
+                    LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(new Intent("strike attack"));
+                }
+                String messegaTest = new String(message.getContent());
+                Log.i("near", messegaTest);
+
+//                if(messegaTest.equals("basic attack")){
+
+//                }
+//                else if(messegaTest.equals("strike attack")){
+//
+//                }
+            }
+        };
+
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerormeterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -104,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mp = MediaPlayer.create(this, R.raw.cool_time);
         mp2 = MediaPlayer.create(this, R.raw.sword);
         mp3 = MediaPlayer.create(this, R.raw.defense);
+        mp4 = MediaPlayer.create(this, R.raw.strike);
 
         attack_check = (TextView) findViewById(R.id.attack_check);
 
@@ -165,16 +199,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-    public boolean isServiceRunningCheck() {
-        ActivityManager manager = (ActivityManager) this.getSystemService(Activity.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if ("becley.becley.shakeservice".equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     protected void onPause() {
         // Unregister since the activity is paused.
@@ -183,8 +207,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onPause();
     }
     protected  void onDestroy(){
+        unPublish();
+        unSubscribe();
         super.onPause();
-
     }
 
     @Override
@@ -255,7 +280,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //                if(check) {
 //                Log.i("x : ", Math.abs(x - lastX) / gabOfTime * 10000 + ", y : " + Math.abs(y - lastY) / gabOfTime * 10000 + ", z : " + Math.abs(z - lastZ) / gabOfTime * 10000);
 //                }
-                if (speed > SHAKE_THRESHOLD) {
+//                Log.i("speed : ", speed+"");
+                if(speed > STRIKE_THRESHOLD){
+                    publish(Long.toString(System.currentTimeMillis()), "Strike");
+                    vibe.vibrate(2000);
+                    if (!mp4.isPlaying()) {
+                        mp4.setLooping(false);
+                        mp4.start();
+                    }
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            unPublish();
+                        }
+                    }, 2000);
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if (speed > SHAKE_THRESHOLD) {
                     // 이벤트발생!!
 //                    vibe.vibrate(80);
                     cnt++;
@@ -302,11 +347,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         }else{
                             if (attack_time) {
                                 vibe.vibrate(800);
-//                                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(MessageService.BASIC_ATTACK));
+                                publish(Long.toString(System.currentTimeMillis()), "Basic");
+                                Log.i("near", "qweqwr");
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        unPublish();
+                                    }
+                                }, 2000);
                                 if (!mp2.isPlaying()) {
                                     mp2.setLooping(false);
                                     mp2.start();
                                 }
+
 
                                 new Thread() {
                                     @Override
@@ -375,7 +428,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
+        subscribe();
     }
 
     @Override
@@ -387,6 +440,41 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
+    private void publish(String message, String type) {
+        Log.i(TAG, "Publishing message: " + message);
+        mActiveMessage = new Message(message.getBytes(), type);
+        PublishOptions.Builder builder = new PublishOptions.Builder();
+        builder.setCallback(new PublishCallback() {
+            @Override
+            public void onExpired() {
+                super.onExpired();
+                Log.i(TAG, "Expired");
+            }
+        }).setStrategy(Strategy.DEFAULT);
+        Nearby.Messages.publish(mGoogleApiClient, mActiveMessage, builder.build());
+    }
+
+    private void unPublish() {
+        Log.i(TAG, "Unpublishing.");
+        if (mActiveMessage != null) {
+            Nearby.Messages.unpublish(mGoogleApiClient, mActiveMessage);
+            mActiveMessage = null;
+        }
+    }
+
+    private void subscribe() {
+        Log.i(TAG, "Subscribing.");
+        Nearby.Messages.subscribe(mGoogleApiClient, mMessageListener);
+    }
+
+    private void unSubscribe() {
+        Log.i(TAG, "Unsubscribing.");
+        Nearby.Messages.unsubscribe(mGoogleApiClient, mMessageListener);
+    }
+
+
 }
+
 
 
