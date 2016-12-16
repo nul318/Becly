@@ -48,7 +48,7 @@ public class MessageService extends Service implements GoogleApiClient.Connectio
         mMessageListener = new MessageListener() {
             @Override
             public void onFound(Message message) {
-                super.onFound(message);
+//                super.onFound(message);
                 String messageText = new String(message.getContent());
                 Log.i(TAG, messageText);
                 Intent intent = new Intent(messageText);
@@ -135,7 +135,9 @@ public class MessageService extends Service implements GoogleApiClient.Connectio
         broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                Log.i(TAG, "asdsds");
                 switch (intent.getAction()){
+
                     case BASIC_ATTACK : {
                         publish(BASIC_ATTACK);
                         handler = new Handler();

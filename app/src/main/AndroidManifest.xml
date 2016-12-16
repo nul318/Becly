@@ -15,7 +15,7 @@
 
         <meta-data
             android:name="com.google.android.nearby.messages.API_KEY"
-            android:value="AIzaSyDnINS8m5yubwcL3cQ30YDuah57qVprN8o" />
+            android:value="AIzaSyBvSFmAAKlMJQCBpgIO3XcOBOC1Vqf40pw" />
 
         <activity android:name=".MainActivity">
         </activity>
@@ -26,6 +26,9 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
         </activity>
+
+        <service android:name=".MessageService"
+            />
 
     </application>
 

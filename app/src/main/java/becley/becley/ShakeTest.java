@@ -2,6 +2,7 @@ package becley.becley;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -10,6 +11,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -55,6 +57,27 @@ public class ShakeTest extends Activity implements SensorEventListener {
         mp = MediaPlayer.create(this, R.raw.cool_time);
 
         attack_check = (TextView) findViewById(R.id.attack_check);
+
+
+
+
+
+        Intent intent = new Intent(ShakeTest.this, MessageService.class);
+
+        startService(intent);
+
+
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(MessageService.BASIC_ATTACK));
+
+
+
+
+
+
+
+
+
+
 
 
         bt.setOnClickListener(new View.OnClickListener() {
@@ -127,7 +150,7 @@ public class ShakeTest extends Activity implements SensorEventListener {
 
 
                                 try {
-                                    Thread.sleep(2000);
+                                    Thread.sleep(1500);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
@@ -144,14 +167,7 @@ public class ShakeTest extends Activity implements SensorEventListener {
                         }.start();
 
                     } else {
-                        vibe.vibrate(50);
-                        try {
-                            Thread.sleep(50);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
 
-                        vibe.vibrate(50);
                         if(!mp.isPlaying()) {
 
                             mp.setLooping(false);
