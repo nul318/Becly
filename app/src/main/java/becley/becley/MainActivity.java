@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         startService(new Intent(MainActivity.this, HpRecoveryService.class));
         circleView.bringToFront();
         defendView.bringToFront();
-
+        strikeView.bringToFront();
     }
 
     @Override
@@ -288,21 +288,44 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 if(speed > STRIKE_THRESHOLD){
                     publish(Long.toString(System.currentTimeMillis()), "Strike");
                     vibe.vibrate(2000);
-                    if (!mp4.isPlaying()) {
-                        mp4.setLooping(false);
-                        mp4.start();
-                    }
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             unPublish();
                         }
                     }, 2000);
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    if (!mp4.isPlaying()) {
+                        mp4.setLooping(false);
+                        mp4.start();
                     }
+
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    strikeView.setVisibility(View.VISIBLE);
+                                    strikeView.setValueAnimated(100, 2000);
+                                }
+                            });
+
+                                                try {
+                                                    Thread.sleep(2000);
+                                                } catch (InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
+
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    strikeView.setVisibility(View.INVISIBLE);
+                                    strikeView.setValueAnimated(0, 0);
+                                    //                                        attack_check.setText("기본공격 가능");
+                                }
+                            });
+                        }
+                    }.start();
                 }
                 else if (speed > SHAKE_THRESHOLD) {
                     // 이벤트발생!!
