@@ -45,15 +45,22 @@ public class ShakeService extends Service implements SensorEventListener {
             long gabOfTime = (currentTime - lastTime);
             if (gabOfTime > 100) {
                 lastTime = currentTime;
-                x = event.values[SensorManager.DATA_X];
+                x = event.values[SensorManager.AXIS_X];
                 y = event.values[SensorManager.DATA_Y];
                 z = event.values[SensorManager.DATA_Z];
+
+
                 speed = Math.abs(x + y + z - lastX - lastY - lastZ) / gabOfTime
                         * 10000;
                 if (speed > SHAKE_THRESHOLD) {
                     Log.i("흔든 횟수 : ", cnt + "");
+                    Log.i("EventValue X : ", event.values[DATA_X] + "");
+                    Log.i("EventValue Y : ", event.values[DATA_Y] + "");
+                    Log.i("EventValue Z : ", event.values[DATA_Z] + "");
                     cnt++;
                 }
+
+
                 lastX = event.values[DATA_X];
                 lastY = event.values[DATA_Y];
                 lastZ = event.values[DATA_Z];
