@@ -35,6 +35,8 @@ import at.grabner.circleprogress.CircleProgressView;
 public class MainActivity extends AppCompatActivity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     CircleProgressView circleView;
+    CircleProgressView defendView;
+    CircleProgressView strikeView;
 
 
     private long lastTime;
@@ -85,7 +87,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
         circleView = (CircleProgressView) findViewById(R.id.circleView);
-        circleView = (CircleProgressView) findViewById(R.id.circleView);
+        defendView = (CircleProgressView) findViewById(R.id.defendView);
+        strikeView = (CircleProgressView) findViewById(R.id.strikeView);
 
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -145,23 +148,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         aa = LocalBroadcastManager.getInstance(MainActivity.this);
 
 
-        Button buttonStartService = (Button)findViewById(R.id.btnPlay);
-        buttonStartService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-//                Register MessageService in Manifest to work
-                Intent hp_gen_intent = new Intent("strike attack");
-                // You can also include some extra data.
-                hp_gen_intent.setAction("strike attack");
-                aa.sendBroadcast(hp_gen_intent);
-//Log.i("tas","dasda");
-
-            }
-        });
+//        Button buttonStartService = (Button)findViewById(R.id.btnPlay);
+//        buttonStartService.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // TODO Auto-generated method stub
+////                Register MessageService in Manifest to work
+//                Intent hp_gen_intent = new Intent("strike attack");
+//                // You can also include some extra data.
+//                hp_gen_intent.setAction("strike attack");
+//                aa.sendBroadcast(hp_gen_intent);
+////Log.i("tas","dasda");
+//
+//            }
+//        });
         HpRecoveryService.isStop = true;
         startService(new Intent(MainActivity.this, HpRecoveryService.class));
         circleView.bringToFront();
+        defendView.bringToFront();
 
     }
 
@@ -277,7 +281,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                     handler.post(new Runnable() {
                                         @Override
                                         public void run() {
+                                            defendView.setVisibility(View.VISIBLE);
 
+                                            defendView.setValueAnimated(100, 3000);
 //                                        attack_check.setText("기본공격 쿨타임 입니다");
                                         }
                                     });
@@ -292,7 +298,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                     handler.post(new Runnable() {
                                         @Override
                                         public void run() {
-
+                                            defendView.setVisibility(View.INVISIBLE);
+                                            defendView.setValueAnimated(0, 0);
 //                                        attack_check.setText("기본공격 가능");
                                         }
                                     });
@@ -319,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                             public void run() {
                                                 circleView.setVisibility(View.VISIBLE);
 
-                                                circleView.setValueAnimated(100, 1500);
+                                                circleView.setValueAnimated(100, 2000);
 
 //                                        attack_check.setText("기본공격 쿨타임 입니다");
                                             }

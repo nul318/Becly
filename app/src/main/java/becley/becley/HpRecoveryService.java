@@ -43,7 +43,7 @@ public class HpRecoveryService extends Service {
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("basic attack");
-        intentFilter.addAction("strike sttack");
+        intentFilter.addAction("strike attack");
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 enemy_attack, intentFilter);
