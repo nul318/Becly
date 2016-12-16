@@ -14,17 +14,24 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.akexorcist.roundcornerprogressbar.IconRoundCornerProgressBar;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.nearby.Nearby;
 
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
 
 
@@ -37,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float lastZ;
     private float x, y, z;
 
-    private static final int SHAKE_THRESHOLD = 800;
+    private static final int SHAKE_THRESHOLD = 200;
     private static final int DATA_X = SensorManager.DATA_X;
     private static final int DATA_Y = SensorManager.DATA_Y;
     private static final int DATA_Z = SensorManager.DATA_Z;
@@ -48,19 +55,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     int cnt=0;
 
     Boolean attack_time = true;
-    Boolean defense_check;
-    Boolean defense_time;
+    Boolean defense_time = true;
+
     Vibrator vibe;
     Handler handler = new Handler();
 
     TextView attack_check;
     MediaPlayer mp;
+    MediaPlayer mp2;
+    MediaPlayer mp3;
 
 
+    int defense_check=-1;
 
 
-
-
+    private GoogleApiClient mGoogleApiClient;
 
 
 
@@ -78,14 +87,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
 
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Nearby.MESSAGES_API)
+                .addConnectionCallbacks(this)
+                .enableAutoManage(this, this)
+                .build();
+
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerormeterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         attack_time = true;
 
         Button bt = (Button) findViewById(R.id.defense);
-        defense_check = true;
+
         mp = MediaPlayer.create(this, R.raw.cool_time);
+        mp2 = MediaPlayer.create(this, R.raw.sword);
+        mp3 = MediaPlayer.create(this, R.raw.defense);
 
         attack_check = (TextView) findViewById(R.id.attack_check);
 
@@ -103,10 +120,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
 
+        new Thread () {
+            @Override
+            public void run() {
+                while(true){
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    cnt=0;
+                }
+
+            }
+        }.start();
 
 
 
 
+
+        Intent intent = new Intent(this, MessageService.class);
+        startService(intent);
 
 
 
@@ -118,20 +152,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         User_HP = (TextView) findViewById(R.id.User_HP);
         aa = LocalBroadcastManager.getInstance(MainActivity.this);
 
-        if(!isServiceRunningCheck()) {
-            Intent intent = new Intent("becley.becley.shakeservice");
-            intent.setPackage("becley.becley");
-            startService(intent);
-        }
+
         Button buttonStartService = (Button)findViewById(R.id.btnPlay);
         buttonStartService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 //Register MessageService in Manifest to work
-                Intent hp_gen_intent = new Intent("strike sttack");
+                Intent hp_gen_intent = new Intent("strike attack");
                 // You can also include some extra data.
-                hp_gen_intent.setAction("strike sttack");
+                hp_gen_intent.setAction("strike attack");
                 aa.sendBroadcast(hp_gen_intent);
                 progressOne.setProgress(70);
                 Toast.makeText(getApplicationContext(),"ss"+progressOne.getMax(),Toast.LENGTH_LONG).show();
@@ -196,6 +226,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (accelerormeterSensor != null)
             sensorManager.registerListener(this, accelerormeterSensor,
                     SensorManager.SENSOR_DELAY_GAME);
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -224,26 +255,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 y = event.values[1];
                 z = event.values[2];
 
-                speed = Math.abs(x + y + z - lastX - lastY - lastZ) / gabOfTime * 10000;
-
+                speed = Math.abs(x - lastX) / gabOfTime * 10000;
+                Log.i("cnt ", cnt+"");
 //                if(check) {
 //                Log.i("x : ", Math.abs(x - lastX) / gabOfTime * 10000 + ", y : " + Math.abs(y - lastY) / gabOfTime * 10000 + ", z : " + Math.abs(z - lastZ) / gabOfTime * 10000);
 //                }
                 if (speed > SHAKE_THRESHOLD) {
                     // 이벤트발생!!
+//                    vibe.vibrate(80);
                     cnt++;
-                    if(cnt>5){
-                        cnt=0;
+                    if(cnt>5) {
+                        cnt = 0;
+                        Log.i("defense" , defense_check+"");
+                        if (defense_check == 2 && defense_time) {
+                            if (!mp3.isPlaying()) {
+                                mp3.setLooping(false);
+                                mp3.start();
+                            }
 
-                        if (attack_time) {
-
-                            vibe.vibrate(500);
 
                             new Thread() {
                                 @Override
                                 public void run() {
-                                    attack_time = false;
-
+                                    defense_time = false;
 
                                     handler.post(new Runnable() {
                                         @Override
@@ -252,15 +286,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                         }
                                     });
 
-
                                     try {
-                                        Thread.sleep(1500);
+                                        Thread.sleep(3000);
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
                                     }
 
-
-                                    attack_time = true;
+                                    defense_time = true;
                                     handler.post(new Runnable() {
                                         @Override
                                         public void run() {
@@ -270,12 +302,52 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 }
                             }.start();
 
-                        } else {
+                        }else{
+                            if (attack_time) {
+                                vibe.vibrate(800);
+                                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(MessageService.BASIC_ATTACK));
+                                if (!mp2.isPlaying()) {
+                                    mp2.setLooping(false);
+                                    mp2.start();
+                                }
 
-                            if(!mp.isPlaying()) {
+                                new Thread() {
+                                    @Override
+                                    public void run() {
+                                        attack_time = false;
 
-                                mp.setLooping(false);
-                                mp.start();
+
+                                        handler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+//                                        attack_check.setText("기본공격 쿨타임 입니다");
+                                            }
+                                        });
+
+
+                                        try {
+                                            Thread.sleep(2000);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+
+
+                                        attack_time = true;
+                                        handler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+//                                        attack_check.setText("기본공격 가능");
+                                            }
+                                        });
+                                    }
+                                }.start();
+
+                            } else {
+                                vibe.vibrate(100);
+//                            if(!mp.isPlaying()) {
+//                                mp.setLooping(false);
+//                                mp.start();
+//                            }
                             }
                         }
                     }
@@ -292,13 +364,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        defense_check=event.getAction();
+        return super.onTouchEvent(event);
+    }
 
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
 
+    }
 
+    @Override
+    public void onConnectionSuspended(int i) {
 
+    }
 
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-
+    }
 }
 
 
