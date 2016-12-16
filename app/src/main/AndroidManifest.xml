@@ -16,7 +16,7 @@
 
         <meta-data
             android:name="com.google.android.nearby.messages.API_KEY"
-            android:value="AIzaSyBvSFmAAKlMJQCBpgIO3XcOBOC1Vqf40pw" />
+            android:value="AIzaSyC5kPu77pDJ1BSV4Of4GqsqxVKzoxI5EAg" />
 
         <activity android:name=".MainActivity">
             <intent-filter>

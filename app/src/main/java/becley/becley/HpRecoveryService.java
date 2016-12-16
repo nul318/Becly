@@ -123,7 +123,7 @@ public class HpRecoveryService extends Service {
                 aa.sendBroadcast(hp_sub_intent);
 
             }
-            else if(intent.getAction().equals("strike sttack")==true)
+            else if(intent.getAction().equals("strike attack")==true)
             {
                 hp = hp-STRIKE_ATTACK;
                 if(hp<0)
