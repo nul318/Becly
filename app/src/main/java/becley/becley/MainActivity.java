@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
         circleView = (CircleProgressView) findViewById(R.id.circleView);
+        circleView = (CircleProgressView) findViewById(R.id.circleView);
 
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
