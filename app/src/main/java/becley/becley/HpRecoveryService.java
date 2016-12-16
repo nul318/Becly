@@ -71,6 +71,7 @@ public class HpRecoveryService extends Service {
                         // You can also include some extra data.
                         hp_gen_intent.putExtra("message", hp++);
                         aa.sendBroadcast(hp_gen_intent);
+
                     }
                     else
                     {
